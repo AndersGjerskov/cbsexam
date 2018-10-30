@@ -7,7 +7,18 @@ import org.bouncycastle.util.encoders.Hex;
 
 public final class Hashing {
 
-  // TODO: You should add a salt and make this secure
+  // TODO: You should add a salt and make this secure : fix
+
+  public static String HashWithSalt(String string){
+
+    //Laver et tilfældigt salt
+    String salt = "sdjhjsljdf";
+    //Tilføjer salt til vores password
+    String hashedpassword = string + salt;
+    //Returnerer vores password med salt som String rawString til vores md5 hashing metode
+    return md5(hashedpassword);
+  }
+
   public static String md5(String rawString) {
     try {
 
@@ -37,7 +48,19 @@ public final class Hashing {
     return null;
   }
 
-  // TODO: You should add a salt and make this secure
+  // TODO: You should add a salt and make this secure : fix
+
+  public static String shaWithSalt (String string){
+
+    //Laver et tilfældigt salt
+    String salt = "asdjansjdk";
+    //Tilføjer salt til vores password
+    String hashedpassword = string + salt;
+    //Returnerer vores password med salt som String rawString til vores sha hashing metode
+    return sha(hashedpassword);
+
+  }
+
   public static String sha(String rawString) {
     try {
       // We load the hashing algoritm we wish to use.
