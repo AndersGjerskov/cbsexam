@@ -115,7 +115,11 @@ public class UserController {
             + "', '"
             + user.getLastname()
             + "', '"
-                //Sørger for at den hasher pasworded
+                /*
+                Sørger for at den hasher passworded inden den gemmer det
+                Kunne også have brugt sha hashing ved at skrive følgende istedet for:
+                + Hashing.sha(user.getPassword())
+                */
             + Hashing.md5(user.getPassword())
             + "', '"
             + user.getEmail()
