@@ -158,22 +158,19 @@ public class UserController {
     }
   }
 
-  public static boolean update(int id) {
+  public static boolean update(User user, int id) {
     //Kopieret fra CreateUser længgere oppe:
     // Check for DB Connection
     if (dbCon == null) {
       dbCon = new DatabaseController();
     }
 
-    //Henter user ud fra id.
-    User user = UserController.getUser(id);
-
     //sletter user fra databasen ud fra ID og returnerer true hvis det lykkes
     if (user != null) {
       dbCon.updateDelete("UPDATE user SET first_name ='" + user.getFirstname() +
                               "', last_name = '" + user.getLastname() +
                               "', email = '" + user.getEmail() +
-                              "ø, password = '" + user.getPassword() +
+                              "', password = '" + user.getPassword() +
                               "'where id=" + id);
       return true;
     } else {

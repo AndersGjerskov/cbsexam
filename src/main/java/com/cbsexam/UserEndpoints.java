@@ -123,7 +123,7 @@ public class UserEndpoints {
     //Konverterer user fra json til gson
     User user = new Gson().fromJson(body, User.class);
 
-    boolean update = UserController.update(id);
+    boolean update = UserController.update(user, id);
 
     // Opdaterer vores Cache
     userCache.getUsers(true);
