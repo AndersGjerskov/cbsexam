@@ -47,7 +47,7 @@ public class ProductEndpoints {
 
     // Call our controller-layer in order to get the order from the DB
     // Istedet for controller-layer henter vi det fra vores Cache
-    ArrayList<Product> products = productCache.getProducts(true);
+    ArrayList<Product> products = productCache.getProducts(false);
 
     // TODO: Add Encryption to JSON : fix
     // We convert the java object to json with GSON library imported in Maven

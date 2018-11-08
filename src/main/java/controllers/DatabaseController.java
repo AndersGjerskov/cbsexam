@@ -110,4 +110,26 @@ public class DatabaseController {
     // Return the resultset which at this point will be null
     return result;
   }
+
+  //Metode som bruges til delete i vores UserController
+    public boolean updateDelete(String sql) {
+
+    // Kopieret fra linje 89-91
+    // Check for DB Connection
+      if (connection == null) {
+        connection = getConnection();
+      }
+
+      // Kører vores sql statement i databasen
+      try{
+        PreparedStatement updateDelete = connection.prepareStatement(sql);
+        updateDelete.executeUpdate();
+
+        return true;
+      }catch (SQLException e){
+        System.out.println(e.getMessage());
+
+        return false;
+      }
+    }
 }

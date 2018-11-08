@@ -33,12 +33,12 @@ public class UserController {
       // Get first object, since we only have one
       if (rs.next()) {
         user =
-            new User(
-                rs.getInt("id"),
-                rs.getString("first_name"),
-                rs.getString("last_name"),
-                rs.getString("password"),
-                rs.getString("email"));
+                new User(
+                        rs.getInt("id"),
+                        rs.getString("first_name"),
+                        rs.getString("last_name"),
+                        rs.getString("password"),
+                        rs.getString("email"));
 
         // return the create object
         return user;
@@ -58,7 +58,7 @@ public class UserController {
    *
    * @return
    */
-  public static ArrayList<User> getUsers() {
+  public static ArrayList <User> getUsers() {
 
     // Check for DB connection
     if (dbCon == null) {
@@ -70,18 +70,18 @@ public class UserController {
 
     // Do the query and initialyze an empty list for use if we don't get results
     ResultSet rs = dbCon.query(sql);
-    ArrayList<User> users = new ArrayList<User>();
+    ArrayList <User> users = new ArrayList <User>();
 
     try {
       // Loop through DB Data
       while (rs.next()) {
         User user =
-            new User(
-                rs.getInt("id"),
-                rs.getString("first_name"),
-                rs.getString("last_name"),
-                rs.getString("password"),
-                rs.getString("email"));
+                new User(
+                        rs.getInt("id"),
+                        rs.getString("first_name"),
+                        rs.getString("last_name"),
+                        rs.getString("password"),
+                        rs.getString("email"));
 
         // Add element to list
         users.add(user);
@@ -108,34 +108,77 @@ public class UserController {
     }
 
     // Insert the user in the DB
-    // TODO: Hash the user password before saving it.
+    // TODO: Hash the user password before saving it. : fix
     int userID = dbCon.insert(
-        "INSERT INTO user(first_name, last_name, password, email, created_at) VALUES('"
-            + user.getFirstname()
-            + "', '"
-            + user.getLastname()
-            + "', '"
+            "INSERT INTO user(first_name, last_name, password, email, created_at) VALUES('"
+                    + user.getFirstname()
+                    + "', '"
+                    + user.getLastname()
+                    + "', '"
                 /*
                 Sørger for at den hasher passworded inden den gemmer det
                 Kunne også have brugt sha hashing ved at skrive følgende istedet for:
                 + Hashing.sha(user.getPassword())
                 */
-            + Hashing.md5(user.getPassword())
-            + "', '"
-            + user.getEmail()
-            + "', "
-            + user.getCreatedTime()
-            + ")");
+                    + Hashing.md5(user.getPassword())
+                    + "', '"
+                    + user.getEmail()
+                    + "', "
+                    + user.getCreatedTime()
+                    + ")");
 
     if (userID != 0) {
       //Update the userid of the user before returning
       user.setId(userID);
-    } else{
+    } else {
       // Return null if user has not been inserted into database
       return null;
     }
 
     // Return user
     return user;
+  }
+
+  public static boolean delete(int id) {
+    //Kopieret fra CreateUser længgere oppe:
+    // Check for DB Connection
+    if (dbCon == null) {
+      dbCon = new DatabaseController();
+    }
+
+    //Henter user ud fra id.
+    User user = UserController.getUser(id);
+
+    //sletter user fra databasen ud fra ID og returnerer true hvis det lykkes
+    if (user != null) {
+      dbCon.updateDelete("DELETE from user WHERE id =" + id);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  public static boolean update(int id) {
+    //Kopieret fra CreateUser længgere oppe:
+    // Check for DB Connection
+    if (dbCon == null) {
+      dbCon = new DatabaseController();
+    }
+
+    //Henter user ud fra id.
+    User user = UserController.getUser(id);
+
+    //sletter user fra databasen ud fra ID og returnerer true hvis det lykkes
+    if (user != null) {
+      dbCon.updateDelete("UPDATE user SET first_name ='" + user.getFirstname() +
+                              "', last_name = '" + user.getLastname() +
+                              "', email = '" + user.getEmail() +
+                              "ø, password = '" + user.getPassword() +
+                              "'where id=" + id);
+      return true;
+    } else {
+      return false;
+
+    }
   }
 }

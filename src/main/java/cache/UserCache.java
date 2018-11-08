@@ -6,7 +6,7 @@ import utils.Config;
 
 import java.util.ArrayList;
 
-//TODO: Build this cache and use it.
+//TODO: Build this cache and use it. : fix
 //Bruge samme opbygning som i ProductCache til at bygge den.
 //Mangler at vidst at gøre noget i Enpoint klassen for at kunne bruge den
 public class UserCache {
