@@ -2,7 +2,13 @@ package controllers;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+
+import cache.UserCache;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTCreationException;
 import model.User;
 import utils.Hashing;
 import utils.Log;
@@ -168,14 +174,50 @@ public class UserController {
     //sletter user fra databasen ud fra ID og returnerer true hvis det lykkes
     if (user != null) {
       dbCon.updateDelete("UPDATE user SET first_name ='" + user.getFirstname() +
-                              "', last_name = '" + user.getLastname() +
-                              "', email = '" + user.getEmail() +
-                              "', password = '" + user.getPassword() +
-                              "'where id=" + id);
+              "', last_name = '" + user.getLastname() +
+              "', email = '" + user.getEmail() +
+              "', password = '" + user.getPassword() +
+              "'where id=" + id);
       return true;
     } else {
       return false;
 
     }
+  }
+
+  //Metode til login
+  public static String loginUser(User loginUser) {
+
+    //Checker for db connection
+    if (dbCon == null) {
+      dbCon = new DatabaseController();
+    }
+
+    //Laver et timestamp som vi kan bruge til vores token
+    Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+
+    UserCache userCache = new UserCache();
+
+    //Henter alle vores users fra vores Cache
+    ArrayList <User> users = userCache.getUsers(true);
+
+    for (User user : users) {
+      //Tjekker om email og password passer med dem fra vores Database
+      if (user.getEmail().equals(loginUser.getEmail()) && user.getPassword().equals(Hashing.HashWithSalt(loginUser.getPassword())))
+        ;
+      {
+        try {
+          //Laver en token ved hjælp af HMAC256 algoritmen og returnerer den.
+          Algorithm algorithmHS = Algorithm.HMAC256("secret");
+          String token = JWT.create().withClaim("ANDKEY", timestamp).sign(algorithmHS);
+          return token;
+        } catch (JWTCreationException exception) {
+
+          //Skal der laves en action her?
+
+        }
+      }
+
+    }return null;
   }
 }

@@ -82,14 +82,27 @@ public class UserEndpoints {
     }
   }
 
-  // TODO: Make the system able to login users and assign them a token to use throughout the system.
+  // TODO: Make the system able to login users and assign them a token to use throughout the system. : fix
   @POST
-  @Path("/login")
+  @Path("/login/")
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response loginUser(String x) {
+  public Response loginUser(String body) {
 
-    // Return a response with status 200 and JSON as type
-    return Response.status(400).entity("Endpoint not implemented yet").build();
+    Log.writeLog(this.getClass().getName(), this, "User logged in", 0);
+
+    //Body har noget at gøre med når vi tester i postman?
+    User loginUser = new Gson().fromJson(body, User.class);
+
+    String token = new UserController().loginUser(loginUser);
+
+    if (token != null){
+      // Returnerer svar hvis user er succesfuldt logget ind
+      // Return a response with status 200 and JSON as type
+      return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity("User has logged in").build();
+    } else {
+      // Returnerer svar hvis brugeren ikke kunne slettes
+      return Response.status(400).entity("Could not log user in").build();
+    }
   }
 
   // TODO: Make the system able to delete users : fix
@@ -98,6 +111,8 @@ public class UserEndpoints {
   @Path("/delete/{userId}")
   @Consumes(MediaType.APPLICATION_JSON)
   public Response deleteUser(@PathParam("userId") int id) {
+
+    Log.writeLog(this.getClass().getName(), this, "Deleted user", 0);
 
     //Returnerer true eller false efter hvorvidt delete metoden er kørt fra UserController
     Boolean delete = UserController.delete(id);
@@ -115,10 +130,12 @@ public class UserEndpoints {
     }
   }
 
-  // TODO: Make the system able to update users
+  // TODO: Make the system able to update users : fix
   @POST
   @Path("/update/{userId}")
   public Response updateUser(@PathParam("userId") int id, String body) {
+
+    Log.writeLog(this.getClass().getName(), this, "Updated user", 0);
 
     //Konverterer user fra json til gson
     User user = new Gson().fromJson(body, User.class);
