@@ -2,13 +2,17 @@ package controllers;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 
 import cache.UserCache;
 import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import model.User;
 import utils.Hashing;
 import utils.Log;
@@ -126,7 +130,7 @@ public class UserController {
                 Kunne også have brugt sha hashing ved at skrive følgende istedet for:
                 + Hashing.sha(user.getPassword())
                 */
-                    + Hashing.md5(user.getPassword())
+                    + Hashing.HashWithSalt(user.getPassword())
                     + "', '"
                     + user.getEmail()
                     + "', "
@@ -145,7 +149,7 @@ public class UserController {
     return user;
   }
 
-  public static boolean delete(int id) {
+  public static Boolean delete(int id) {
     //Kopieret fra CreateUser længgere oppe:
     // Check for DB Connection
     if (dbCon == null) {
@@ -157,14 +161,14 @@ public class UserController {
 
     //sletter user fra databasen ud fra ID og returnerer true hvis det lykkes
     if (user != null) {
-      dbCon.updateDelete("DELETE from user WHERE id =" + id);
+      dbCon.updateDelete("DELETE FROM user WHERE id =" + id);
       return true;
     } else {
       return false;
     }
   }
 
-  public static boolean update(User user, int id) {
+  public static Boolean update(User user, int id) {
     //Kopieret fra CreateUser længgere oppe:
     // Check for DB Connection
     if (dbCon == null) {
@@ -176,8 +180,8 @@ public class UserController {
       dbCon.updateDelete("UPDATE user SET first_name ='" + user.getFirstname() +
               "', last_name = '" + user.getLastname() +
               "', email = '" + user.getEmail() +
-              "', password = '" + user.getPassword() +
-              "'where id=" + id);
+              "', password = '" + Hashing.HashWithSalt(user.getPassword()) +
+              "'WHERE id=" + id);
       return true;
     } else {
       return false;
@@ -199,17 +203,17 @@ public class UserController {
     UserCache userCache = new UserCache();
 
     //Henter alle vores users fra vores Cache
-    ArrayList <User> users = userCache.getUsers(true);
+    ArrayList <User> users = userCache.getUsers(false);
 
     for (User user : users) {
       //Tjekker om email og password passer med dem fra vores Database
-      if (user.getEmail().equals(loginUser.getEmail()) && user.getPassword().equals(Hashing.HashWithSalt(loginUser.getPassword())))
-        ;
-      {
+      if (user.getEmail().equals(loginUser.getEmail())
+              && user.getPassword().equals(Hashing.HashWithSalt(loginUser.getPassword()))) {
         try {
           //Laver en token ved hjælp af HMAC256 algoritmen og returnerer den.
           Algorithm algorithmHS = Algorithm.HMAC256("secret");
-          String token = JWT.create().withClaim("ANDKEY", timestamp).sign(algorithmHS);
+          String token = JWT.create().withIssuer("auth0").withClaim("ANDKEY", timestamp).withClaim("test", user.getId()).sign(algorithmHS);
+          user.setToken(token);
           return token;
         } catch (JWTCreationException exception) {
 
@@ -219,5 +223,20 @@ public class UserController {
       }
 
     }return null;
+  }
+
+  public static DecodedJWT verifyToken (String userToken){
+
+    //Log
+
+    String token = userToken;
+    try{
+      Algorithm algorithm = Algorithm.HMAC256("secret");
+      JWTVerifier verifier = JWT.require(algorithm).withIssuer("auth0").build();
+      DecodedJWT jwt = verifier.verify(token);
+      return jwt;
+    } catch (JWTVerificationException exception) {
+      exception.getMessage();
+    } return null;
   }
 }

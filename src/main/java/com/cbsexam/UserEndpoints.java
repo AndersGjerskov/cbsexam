@@ -1,6 +1,7 @@
 package com.cbsexam;
 
 import cache.UserCache;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.google.gson.Gson;
 import controllers.UserController;
 import java.util.ArrayList;
@@ -88,17 +89,17 @@ public class UserEndpoints {
   @Consumes(MediaType.APPLICATION_JSON)
   public Response loginUser(String body) {
 
-    Log.writeLog(this.getClass().getName(), this, "User logged in", 0);
+    Log.writeLog(this.getClass().getName(), this, "User login", 0);
 
     //Body har noget at gøre med når vi tester i postman?
     User loginUser = new Gson().fromJson(body, User.class);
 
-    String token = new UserController().loginUser(loginUser);
+    String token = UserController.loginUser(loginUser);
 
     if (token != null){
       // Returnerer svar hvis user er succesfuldt logget ind
       // Return a response with status 200 and JSON as type
-      return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity("User has logged in").build();
+      return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity("User has logged in and token is\n" +  token).build();
     } else {
       // Returnerer svar hvis brugeren ikke kunne slettes
       return Response.status(400).entity("Could not log user in").build();
@@ -109,18 +110,19 @@ public class UserEndpoints {
   //Samme princip som ved login metoden
   @DELETE
   @Path("/delete/{userId}")
-  @Consumes(MediaType.APPLICATION_JSON)
-  public Response deleteUser(@PathParam("userId") int id) {
+  public Response deleteUser(@PathParam("userId") int id, String body) {
 
     Log.writeLog(this.getClass().getName(), this, "Deleted user", 0);
 
-    //Returnerer true eller false efter hvorvidt delete metoden er kørt fra UserController
-    Boolean delete = UserController.delete(id);
+    //Henter vores token fra verifyToken i Usercontrolleren
+    DecodedJWT token = UserController.verifyToken(body);
 
-    //Henter users fra vores Cache
-    userCache.getUsers(true);
+    //Returnerer true eller false efter hvorvidt delete metoden er kørt fra UserController
+    Boolean delete = UserController.delete(token.getClaim("test").asInt());
 
     if (delete){
+      //Henter users fra vores Cache
+      userCache.getUsers(true);
       // Returnerer svar hvis user er blevet slettet
       // Return a response with status 200 and JSON as type
       return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity("Deleting user with id" + id).build();
@@ -132,15 +134,18 @@ public class UserEndpoints {
 
   // TODO: Make the system able to update users : fix
   @POST
-  @Path("/update/{userId}")
-  public Response updateUser(@PathParam("userId") int id, String body) {
+  @Path("/update/{userId}/{token}")
+  public Response updateUser(@PathParam("userId") int id, @PathParam("token") String token, String body) {
 
     Log.writeLog(this.getClass().getName(), this, "Updated user", 0);
 
     //Konverterer user fra json til gson
     User user = new Gson().fromJson(body, User.class);
 
-    boolean update = UserController.update(user, id);
+    //Sørger for at vores bruger er logget ind så vi får den brugers specifikke token.
+    DecodedJWT jwt = UserController.verifyToken(body);
+
+    Boolean update = UserController.update(user, jwt.getClaim("test").asInt());
 
     // Opdaterer vores Cache
     userCache.getUsers(true);
