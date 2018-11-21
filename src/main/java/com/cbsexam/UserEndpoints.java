@@ -114,7 +114,7 @@ public class UserEndpoints {
 
     Log.writeLog(this.getClass().getName(), this, "Deleted user", 0);
 
-    //Henter vores token fra verifyToken i Usercontrolleren
+    //Henter vores token fra verifyToken i Usercontrolleren, den ligger i vores body, da det er der vi skriver den
     DecodedJWT token = UserController.verifyToken(body);
 
     //Returnerer true eller false efter hvorvidt delete metoden er kørt fra UserController
@@ -125,7 +125,7 @@ public class UserEndpoints {
       userCache.getUsers(true);
       // Returnerer svar hvis user er blevet slettet
       // Return a response with status 200 and JSON as type
-      return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity("Deleting user with id" + id).build();
+      return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity("Deleting user with id " + id).build();
     } else {
       // Returnerer svar hvis brugeren ikke kunne slettes
       return Response.status(400).entity("Could not delete user").build();
@@ -142,8 +142,9 @@ public class UserEndpoints {
     //Konverterer user fra json til gson
     User user = new Gson().fromJson(body, User.class);
 
-    //Sørger for at vores bruger er logget ind så vi får den brugers specifikke token.
-    DecodedJWT jwt = UserController.verifyToken(body);
+    //Sørger for at vores bruger er logget ind så vi får den brugers specifikke token,
+    //i modsætning til deleteUser, så gemmer vi den nu i et String objekt der hedder token
+    DecodedJWT jwt = UserController.verifyToken(token);
 
     Boolean update = UserController.update(user, jwt.getClaim("test").asInt());
 
