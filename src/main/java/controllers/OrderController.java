@@ -26,6 +26,69 @@ public class OrderController {
     }
 
     // Build SQL string to query
+/*
+    String sql = "SELECT *, billing.street_address as billing, shipping.street_address as shipping\n " +
+            "FROM orders\n " +
+            "JOIN user on orders.user_id = user.id\n " +
+            "LEFT JOIN address as billing\n " +
+            "ON orders.billing_address_id=billing.id\n " +
+            "LEFT JOIN address as shipping\n " +
+            "ON orders.shipping:address_id = shipping.id\n" +
+            "WHERE orders.id " + id;
+
+    //Udfør query i databasen og lav et tomt objekt til resultatet
+    ResultSet rs = dbCon.query(sql);
+    Order order = null;
+
+    try {
+      if (rs.next()) {
+        ArrayList <LineItem> lineItems = LineItemController.getLineItemsForOrder(rs.getInt("id"));
+
+        User user = new User(
+                rs.getInt("id"),
+                rs.getString("first_name"),
+                rs.getString("last_name"),
+                rs.getString("password"),
+                rs.getString("email"),
+                rs.getLong("created_at")
+        );
+
+        Address billingAdress = new Address(
+                rs.getInt("billing_adress_id"),
+                rs.getString("name"),
+                rs.getString("billing"),
+                rs.getString("city"),
+                rs.getString("zipcode")
+        );
+
+        Address shippingAddress = new Address(
+                rs.getInt("shipping_adress_id"),
+                rs.getString("name"),
+                rs.getString("billing"),
+                rs.getString("city"),
+                rs.getString("zipcode")
+        );
+
+        order = new Order(
+                rs.getInt("id"),
+                user,
+                lineItems,
+                billingAdress,
+                shippingAddress,
+                rs.getFloat("order_total"),
+                rs.getLong("created_at"),
+                rs.getLong("updated_at")
+        );
+
+        return order;
+      } else {
+        System.out.println("Order not fount");
+      }
+    }catch (SQLException e){
+      System.out.println(e.getMessage());
+    } return order;
+    }*/
+
     String sql = "SELECT * FROM orders where id=" + id;
 
     // Do the query in the database and create an empty object for the results
@@ -77,7 +140,7 @@ public class OrderController {
       dbCon = new DatabaseController();
     }
 
-    String sql = "SELECT * FROM order";
+    String sql = "SELECT * FROM orders";
 
     ResultSet rs = dbCon.query(sql);
     ArrayList<Order> orders = new ArrayList<Order>();
@@ -138,7 +201,7 @@ public class OrderController {
 
     // TODO: Enable transactions in order for us to not save the order if somethings fails for some of the other inserts. : fix
 
-    Connection connection = null;
+    Connection connection = DatabaseController.getConnection();
 
 
     //Opretter try-catch
