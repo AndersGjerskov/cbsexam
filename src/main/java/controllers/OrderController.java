@@ -203,11 +203,9 @@ public class OrderController {
 
     Connection connection = DatabaseController.getConnection();
 
-
-    //Opretter try-catch
     try {
 
-      //opretter connection og sørger for at den ikke skal Committe opdateringer automatisk
+      // Making sure nothing is committed automatically
       connection.setAutoCommit(false);
 
       // Insert the product in the DB
@@ -242,10 +240,10 @@ public class OrderController {
 
       order.setLineItems(items);
 
-      //Commiter hvis ordren er gået i gennem
+      // Committing the order if it is succesfully created
       connection.commit();
 
-      //Catch ruller ordren tilbage hvis der skulle være en fejl i ordren
+      // If something goes wrong with the order, we use rollback
     } catch (SQLException e1){
       try {
 
@@ -253,16 +251,15 @@ public class OrderController {
 
         System.out.println("Rollback");
 
-        //Catch hvis den ikke kan rulle ordren tilbage, få fejlbeskeden udskrevet
+        // If we can't rollback the order, print message
       } catch(SQLException e2){
 
         System.out.println("No rollback" + e2.getMessage());
 
-        /*
-        Vi laver en finally for at sørge for at auto commit altid skal være true,
-        fordi vores andre metoder bruger autocommit og vi har sat den til false
-        i starten af transaktionsmetoden
-        */
+
+
+        // Making sure that our autocommit=true any other part of the program
+
       } finally{
 
         try {

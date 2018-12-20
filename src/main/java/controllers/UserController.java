@@ -125,11 +125,7 @@ public class UserController {
                     + "', '"
                     + user.getLastname()
                     + "', '"
-                /*
-                Sørger for at den hasher passworded inden den gemmer det
-                Kunne også have brugt sha hashing ved at skrive følgende istedet for:
-                + Hashing.sha(user.getPassword())
-                */
+                // Making sure that the password is hashed before it is saved in the database
                     + Hashing.HashWithSalt(user.getPassword())
                     + "', '"
                     + user.getEmail()
@@ -156,10 +152,10 @@ public class UserController {
       dbCon = new DatabaseController();
     }
 
-    //Henter user ud fra id.
+    // Getting our user from our user id
     User user = UserController.getUser(id);
 
-    //sletter user fra databasen ud fra ID og returnerer true hvis det lykkes
+    // Return true if the user has been deleted from the database
     if (user != null) {
       dbCon.updateDelete("DELETE FROM user WHERE id =" + id);
       return true;
@@ -169,13 +165,12 @@ public class UserController {
   }
 
   public static Boolean update(User user, int id) {
-    //Kopieret fra CreateUser længgere oppe:
     // Check for DB Connection
     if (dbCon == null) {
       dbCon = new DatabaseController();
     }
 
-    //sletter user fra databasen ud fra ID og returnerer true hvis det lykkes
+    // Return true if the user has been updated in the database
     if (user != null) {
       dbCon.updateDelete("UPDATE user SET first_name ='" + user.getFirstname() +
               "', last_name = '" + user.getLastname() +
@@ -189,7 +184,6 @@ public class UserController {
     }
   }
 
-  //Metode til login
   public static String loginUser(User loginUser) {
 
     //Checker for db connection
@@ -197,27 +191,27 @@ public class UserController {
       dbCon = new DatabaseController();
     }
 
-    //Laver et timestamp som vi kan bruge til vores token
+    // Creating a timestamp to use for our token
     Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 
     UserCache userCache = new UserCache();
 
-    //Henter alle vores users fra vores Cache
+    // Getting users from our cache
     ArrayList <User> users = userCache.getUsers(false);
 
     for (User user : users) {
-      //Tjekker om email og password passer med dem fra vores Database
+      // Checking if the email and password matches
       if (user.getEmail().equals(loginUser.getEmail())
               && user.getPassword().equals(Hashing.HashWithSalt(loginUser.getPassword()))) {
         try {
-          //Laver en token ved hjælp af HMAC256 algoritmen og returnerer den.
+          // Creating a token with the HMAC256 algorithm and returning it.
           Algorithm algorithmHS = Algorithm.HMAC256("secret");
           String token = JWT.create().withIssuer("auth0").withClaim("ANDKEY", timestamp).withClaim("test", user.getId()).sign(algorithmHS);
           user.setToken(token);
           return token;
         } catch (JWTCreationException exception) {
 
-          //Skal der laves en action her?
+          // Should be an action here if it fails
 
         }
       }
@@ -226,8 +220,6 @@ public class UserController {
   }
 
   public static DecodedJWT verifyToken (String userToken){
-
-    //Log
 
     String token = userToken;
     try{

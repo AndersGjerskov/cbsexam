@@ -20,19 +20,16 @@ public final class Config {
   private static String SOLR_PATH;
   private static String SOLR_CORE;
   private static long PRODUCT_TTL;
-  //Laver samme til User og Order
   private static long USER_TTL;
   private static long ORDER_TTL;
-  //Laver til ENCRYP_TTL
   private static String ENCRYP_KEY;
 
-  //Get metode til Encyption key
   public static char[] getEncrypKey(){ return ENCRYP_KEY.toCharArray();}
 
   public static long getProductTtl() {
     return PRODUCT_TTL;
   }
-  // Lav samme linje til User og Order
+
   public static long getUserTtl() {return USER_TTL; }
 
   public static long getOrderTtl() {return ORDER_TTL; }

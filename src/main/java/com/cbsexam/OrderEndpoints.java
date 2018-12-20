@@ -17,7 +17,7 @@ import utils.Encryption;
 @Path("order")
 public class OrderEndpoints {
 
-  //Denne linje instatierer vores Cache 1 gang så vi kan bruge den
+  //Creating an instance of our Cache once, so we can use it in this endpoint
   public static OrderCache orderCache = new OrderCache();
 
   /**
@@ -34,6 +34,7 @@ public class OrderEndpoints {
     // TODO: Add Encryption to JSON : fix
     // We convert the java object to json with GSON library imported in Maven
     String json = new Gson().toJson(order);
+    // Using XOR to encrypt the json
     json = Encryption.encryptDecryptXOR(json);
 
     // Return a response with status 200 and JSON as type
@@ -46,12 +47,13 @@ public class OrderEndpoints {
   public Response getOrders() {
 
     // Call our controller-layer in order to get the order from the DB
-    // Istedet for controller-layer henter vi det fra vores Cache
-    ArrayList<Order> orders = orderCache.getOrders(true);
+    // Instead of our controller-layer, we get the orders from our Cache
+    ArrayList<Order> orders = orderCache.getOrders(false);
 
     // TODO: Add Encryption to JSON : fix
     // We convert the java object to json with GSON library imported in Maven
     String json = new Gson().toJson(orders);
+    // Using XOR to encrypt the json
     json = Encryption.encryptDecryptXOR(json);
 
     // Return a response with status 200 and JSON as type
@@ -74,6 +76,8 @@ public class OrderEndpoints {
 
     // Return the data to the user
     if (createdOrder != null) {
+      // Updating Cache
+      orderCache.getOrders(true);
       // Return a response with status 200 and JSON as type
       return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(json).build();
     } else {

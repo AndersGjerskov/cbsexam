@@ -11,11 +11,11 @@ public final class Hashing {
 
   public static String HashWithSalt(String string){
 
-    //Laver et tilfældigt salt
+    // Making a salt
     String salt = "sdjhjsljdf";
-    //Tilføjer salt til vores password
+    // Adding the salt to our password
     String hashedpassword = string + salt;
-    //Returnerer vores password med salt som String rawString til vores md5 hashing metode
+    // Hashing our password with salt and returning it
     return md5(hashedpassword);
   }
 
@@ -52,11 +52,11 @@ public final class Hashing {
 
   public static String shaWithSalt (String string){
 
-    //Laver et tilfældigt salt
+    // Making a salt
     String salt = "asdjansjdk";
-    //Tilføjer salt til vores password
+    // Adding the salt to our password
     String hashedpassword = string + salt;
-    //Returnerer vores password med salt som String rawString til vores sha hashing metode
+    // Hashing our password with salt and returning it
     return sha(hashedpassword);
 
   }

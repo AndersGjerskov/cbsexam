@@ -98,7 +98,7 @@ public class ProductController {
     }
 
     // TODO: Use caching layer. : fix
-    //Er blevet implementeret i ProductEndpoints klassen
+    // Has been implemented in the productEndpoint
     String sql = "SELECT * FROM product";
 
     ResultSet rs = dbCon.query(sql);

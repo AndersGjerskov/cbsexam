@@ -15,7 +15,7 @@ import utils.Log;
 @Path("user")
 public class UserEndpoints {
 
-  //Denne linje instantieres vores Cache 1 gang så vi kan bruge den
+  //Creating an instance of our Cache once, so we can use it in this endpoint
   private static UserCache userCache = new UserCache();
 
   /**
@@ -32,13 +32,15 @@ public class UserEndpoints {
     // TODO: Add Encryption to JSON : fix
     // Convert the user object to json in order to return the object
     String json = new Gson().toJson(user);
+    // Using XOR to encrypt the json
     json = Encryption.encryptDecryptXOR(json);
 
     // Return the user with the status code 200
     // TODO: What should happen if something breaks down? : fix
     if (user != null){
     return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(json).build();
-  } else{
+    //If we cant return a user, we will return a message with the status code 400
+    } else{
       return Response.status(400).entity("Could not return user").build();
     }
   }
@@ -53,11 +55,12 @@ public class UserEndpoints {
 
     // Get a list of users
     // Istedet for controller-layer henter vi det fra vores Cache
-    ArrayList<User> users = userCache.getUsers(true);
+    ArrayList<User> users = userCache.getUsers(false);
 
     // TODO: Add Encryption to JSON : fix
     // Transfer users to json in order to return it to the user
     String json = new Gson().toJson(users);
+    // Using XOR to encrypt the json
     json = Encryption.encryptDecryptXOR(json);
 
     // Return the users with the status code 200
@@ -80,6 +83,8 @@ public class UserEndpoints {
 
     // Return the data to the user
     if (createUser != null) {
+      //Updating the cache if the user has been created
+      userCache.getUsers(true);
       // Return a response with status 200 and JSON as type
       return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(json).build();
     } else {
@@ -95,43 +100,49 @@ public class UserEndpoints {
 
     Log.writeLog(this.getClass().getName(), this, "User login", 0);
 
-    //Body har noget at gøre med når vi tester i postman?
+    // Reading the json from body and adding it to loginUser
     User loginUser = new Gson().fromJson(body, User.class);
 
+    // Setting token as the token that was given to the user which has logged in
     String token = UserController.loginUser(loginUser);
 
     if (token != null){
-      // Returnerer svar hvis user er succesfuldt logget ind
+      // Return an answer, with the given token, if the login was succesfull
       // Return a response with status 200 and JSON as type
-      return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity("User has logged in and token is\n" +  token).build();
+      return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity("User has logged in and the users token is\n" +  token).build();
+
     } else {
-      // Returnerer svar hvis brugeren ikke kunne slettes
+      // If the login was not succesfull, return a message with the status code 400
       return Response.status(400).entity("Could not log user in").build();
     }
   }
 
   // TODO: Make the system able to delete users : fix
-  //Samme princip som ved login metoden
+  // Using the same idea as in the loginUser
   @DELETE
   @Path("/delete/{userId}")
   public Response deleteUser(@PathParam("userId") int id, String body) {
 
     Log.writeLog(this.getClass().getName(), this, "Deleted user", 0);
 
-    //Henter vores token fra verifyToken i Usercontrolleren, den ligger i vores body, da det er der vi skriver den
+    // Verifying our token which we get from the body
     DecodedJWT token = UserController.verifyToken(body);
 
-    //Returnerer true eller false efter hvorvidt delete metoden er kørt fra UserController
+    // Setting delete as either true or false, if the delete method from the UserController was succesfull or not
     Boolean delete = UserController.delete(token.getClaim("test").asInt());
 
+    // Checking if delete=true
     if (delete){
-      //Henter users fra vores Cache
+
+      // Updating our Cache
       userCache.getUsers(true);
-      // Returnerer svar hvis user er blevet slettet
+
+      // Return an answer, with the deleted user id, if the was user was succesfully deleted
       // Return a response with status 200 and JSON as type
       return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity("Deleting user with id " + id).build();
+
     } else {
-      // Returnerer svar hvis brugeren ikke kunne slettes
+      // Return a message with the status code 400 if the user was not deleted.
       return Response.status(400).entity("Could not delete user").build();
     }
   }
@@ -143,19 +154,22 @@ public class UserEndpoints {
 
     Log.writeLog(this.getClass().getName(), this, "Updated user", 0);
 
-    //Konverterer user fra json til gson
+    // Reading the json from body and adding it to the user object
     User user = new Gson().fromJson(body, User.class);
 
-    //Sørger for at vores bruger er logget ind så vi får den brugers specifikke token,
-    //i modsætning til deleteUser, så gemmer vi den nu i et String objekt der hedder token
+    // Opposite to the deleteUser, we now get our token from the Path, save it as a String and use it
     DecodedJWT jwt = UserController.verifyToken(token);
 
+    // Setting update as either true or false, if the update method from the UserController was succesfull or not
     Boolean update = UserController.update(user, jwt.getClaim("test").asInt());
 
-    // Opdaterer vores Cache
-    userCache.getUsers(true);
-
+    // Checking if update=true
     if (update){
+
+      // Updating our Cache
+      userCache.getUsers(true);
+
+      //Return a response with the id of the user which has been updated.
       return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity("Updated user with id" + id).build();
     } else {
       // Returnerer svar hvis brugeren ikke kunne opdateres

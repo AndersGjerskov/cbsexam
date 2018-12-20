@@ -7,7 +7,7 @@ import utils.Config;
 import java.util.ArrayList;
 
 //TODO: Build this cache and use it. : fix
-//Bruge samme opbygning som i ProductCache til at bygge den.
+//Building this Cache just like the ProductCache which was already made
 public class OrderCache {
 
     private ArrayList<Order> orders;
@@ -23,7 +23,8 @@ public class OrderCache {
     public ArrayList <Order> getOrders(boolean forceUpdate) {
 
         if(forceUpdate
-                ||((this.created + this.ttl) >= (System.currentTimeMillis() / 1000L))
+                //Changed ">" to "<" to make the cache work
+                ||((this.created + this.ttl) <= (System.currentTimeMillis() / 1000L))
                 || this.orders.isEmpty())  {
 
             ArrayList<Order> orders = OrderController.getOrders();
