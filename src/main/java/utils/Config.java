@@ -93,7 +93,7 @@ public final class Config {
       stringBuffer.append(str);
     }
 
-    // Konverterer json til variabler ved at typecaste til JsonObject
+    // Converting json to variables by typecasting to JsonObject
     json = (JsonObject) parser.parse(stringBuffer.toString());
 
     // Hiv teksten ud og sæt klassens variable til senere brug
